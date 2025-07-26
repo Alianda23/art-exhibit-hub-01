@@ -169,7 +169,8 @@ const Profile = () => {
   const generateTicketPDF = (booking: UserBooking) => {
     try {
       setGeneratingTicket(booking.id);
-      console.log(`Generating ticket for booking: ${booking.id}`);
+      console.log(`Generating ticket for booking:`, booking);
+      console.log(`Current user:`, currentUser);
       
       // Create HTML content for the ticket
       const ticketHTML = `
@@ -273,7 +274,7 @@ const Profile = () => {
             </div>
             
             <div class="ticket-code">
-              TICKET-${booking.id.toUpperCase()}
+              ${booking.ticket_code || `TICKET-${String(booking.id).toUpperCase()}`}
             </div>
             
             <div class="footer">
