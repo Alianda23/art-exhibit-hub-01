@@ -5,7 +5,7 @@ import jwt
 import os
 from decimal import Decimal
 from middleware import SECRET_KEY
-from datetime import datetime
+from datetime import datetime, date
 
 # Custom JSON encoder to handle Decimal types and datetime objects
 class CustomJSONEncoder(json.JSONEncoder):
@@ -13,6 +13,8 @@ class CustomJSONEncoder(json.JSONEncoder):
         if isinstance(obj, Decimal):
             return float(obj)
         if isinstance(obj, datetime):
+            return obj.isoformat()
+        if isinstance(obj, date):  # Handle date objects
             return obj.isoformat()
         return super(CustomJSONEncoder, self).default(obj)
 
