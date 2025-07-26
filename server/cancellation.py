@@ -90,13 +90,24 @@ def create_cancellation_request(user_id, booking_id, reason):
 
 def get_all_cancellation_requests():
     """Get all cancellation requests for admin view"""
+    print("=== get_all_cancellation_requests called ===")
     connection = get_db_connection()
     if connection is None:
+        print("Database connection failed")
         return {"error": "Database connection failed"}
     
     cursor = connection.cursor()
     
     try:
+        # First check if the table exists
+        cursor.execute("SHOW TABLES LIKE 'ticket_cancellation_requests'")
+        table_exists = cursor.fetchone()
+        print(f"Table exists: {bool(table_exists)}")
+        
+        if not table_exists:
+            print("Cancellation table doesn't exist, returning empty list")
+            return {"cancellations": []}
+        
         query = """
         SELECT tcr.*, u.name as user_name, u.email as user_email,
                eb.booking_date, eb.slots, e.location, e.start_date, e.end_date
@@ -106,6 +117,7 @@ def get_all_cancellation_requests():
         JOIN exhibitions e ON eb.exhibition_id = e.id
         ORDER BY tcr.created_at DESC
         """
+        print(f"Executing query: {query}")
         cursor.execute(query)
         
         cancellations = []
@@ -119,6 +131,8 @@ def get_all_cancellation_requests():
         
     except Exception as e:
         print(f"Error getting cancellation requests: {e}")
+        import traceback
+        print(f"Full traceback: {traceback.format_exc()}")
         return {"error": str(e)}
     finally:
         if connection.is_connected():

@@ -789,11 +789,26 @@ export async function getAllCancellationRequests() {
       throw new Error('Admin access required');
     }
     
+    console.log('About to make authFetch call to /cancellations');
     const response = await authFetch('/cancellations');
-    console.log('Cancellation requests response:', response);
+    console.log('Cancellation requests response received:', response);
+    console.log('Response type:', typeof response);
+    console.log('Response keys:', Object.keys(response || {}));
+    
+    // Check if response has the expected structure
+    if (response && response.cancellations) {
+      console.log('Found cancellations array with length:', response.cancellations.length);
+    } else {
+      console.log('Response does not have cancellations array:', response);
+    }
+    
     return response;
   } catch (error) {
     console.error('Error fetching cancellation requests:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : 'No stack trace'
+    });
     throw error;  // Throw the error instead of returning it
   }
 }

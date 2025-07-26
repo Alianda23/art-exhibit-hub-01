@@ -481,26 +481,42 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         
         # Handle GET /cancellations (admin only)
         elif path == '/cancellations':
-            print("Processing GET /cancellations request")
+            print("=== Processing GET /cancellations request ===")
             auth_header = self.headers.get('Authorization', '')
+            print(f"Auth header received: {auth_header[:50]}..." if auth_header else "No auth header")
             
             # Verify admin access
             token = extract_auth_token(auth_header)
             if not token:
+                print("No token found in auth header")
                 self._set_response(401)
                 self.wfile.write(json_dumps({"error": "Authentication required"}).encode())
                 return
             
+            print(f"Token extracted: {token[:20]}...")
             payload = verify_token(token)
+            print(f"Token payload: {payload}")
+            
             if not payload.get("is_admin", False):
+                print("User is not admin")
                 self._set_response(403)
                 self.wfile.write(json_dumps({"error": "Admin access required"}).encode())
                 return
             
+            print("Admin access verified, calling get_all_cancellation_requests")
             # Get all cancellation requests
             response = get_all_cancellation_requests()
+            print(f"Cancellation response: {response}")
+            print(f"Response type: {type(response)}")
+            
+            if response is None:
+                print("Response is None, sending empty cancellations")
+                response = {"cancellations": []}
+            
             self._set_response()
-            self.wfile.write(json_dumps(response).encode())
+            json_response = json_dumps(response)
+            print(f"JSON response being sent: {json_response}")
+            self.wfile.write(json_response.encode())
             return
         
         # Handle GET /user/{user_id}/cancellations - user's cancellation requests
